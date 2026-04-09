@@ -71,6 +71,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run all registered LLM / prompt demos in order (requires OPENAI_API_KEY).",
     )
 
+    st = sub.add_parser(
+        "structured-tutorial",
+        help="Progressive structured-outputs tutorial (many API calls; needs OPENAI_API_KEY).",
+    )
+    st.add_argument(
+        "--only",
+        dest="structured_only",
+        type=str,
+        default="all",
+        metavar="SECTIONS",
+        help='Comma-separated section numbers 1–12, or "all" (default: all).',
+    )
+
     return parser
 
 
@@ -108,5 +121,10 @@ def main(argv: list[str] | None = None) -> int:
         return prompt_example_main(pe_args)
     if args.command == "run-examples":
         return run_all_examples_main([])
+    if args.command == "structured-tutorial":
+        from python_framework.examples.structured_outputs_tutorial.tutorial import run_tutorial
+
+        o = getattr(args, "structured_only", "all")
+        return run_tutorial([] if str(o).strip().lower() == "all" else ["--only", str(o)])
 
     raise AssertionError(f"unhandled command: {args.command!r}")  # pragma: no cover

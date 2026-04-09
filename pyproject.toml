@@ -49,6 +49,7 @@ fallback_version = "0.1.0"
 [tool.pdm.scripts]
 python-framework = { cmd = "python -m python_framework {args}" }
 prompt-example = { cmd = "python -m python_framework.examples.prompt_example {args}" }
+structured-tutorial = { cmd = "python -m python_framework.examples.structured_outputs_tutorial.tutorial {args}" }
 
 [tool.pdm.build]
 package-dir = "src"
@@ -71,7 +72,10 @@ filterwarnings = [
 [tool.coverage.run]
 source_pkgs = ["python_framework"]
 branch = true
-omit = ["*/python_framework/__main__.py"]
+omit = [
+    "*/python_framework/__main__.py",
+    "*/python_framework/examples/structured_outputs_tutorial/tutorial.py",
+]
 
 [tool.coverage.report]
 exclude_lines = [

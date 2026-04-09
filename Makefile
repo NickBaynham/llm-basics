@@ -4,7 +4,7 @@ IMAGE ?= python-framework:local
 
 .PHONY: help setup configure lock install build lint format test run clean \
 	pre-commit-install pre-commit-run security sbom docker-build docker-run \
-	docker-buildx-multi compose-up compose-down prompt-example
+	docker-buildx-multi compose-up compose-down prompt-example structured-tutorial
 
 help:  ## Show available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?##' $(MAKEFILE_LIST) | sort | \
@@ -53,6 +53,9 @@ test:  ## Run unit tests with coverage gates
 
 prompt-example:  ## Run OpenAI contact extraction demo (needs OPENAI_API_KEY)
 	$(PDM) run python -m python_framework.examples.prompt_example
+
+structured-tutorial:  ## Full structured-outputs tutorial — many API calls (needs OPENAI_API_KEY)
+	$(PDM) run python -m python_framework.examples.structured_outputs_tutorial.tutorial
 
 run:  ## Run all registered LLM examples via PDM (needs OPENAI_API_KEY)
 	$(PDM) run python-framework run-examples

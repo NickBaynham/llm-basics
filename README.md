@@ -76,6 +76,21 @@ make test
 docker run --rm -e OPENAI_API_KEY="$OPENAI_API_KEY" python-framework:local prompt-example
 ```
 
+## Structured outputs tutorial (lesson path)
+
+A separate **progressive module** under `src/python_framework/examples/structured_outputs_tutorial/` walks through operations-themed scenarios (support ticket priority, meeting requests, IT triage, meeting action items, project status, vendor onboarding via **Responses API** `json_schema` + `strict`, expense routing, and an exercise stub). It uses shared helpers: `ask_openai()`, `parse_json()`, Pydantic models, validators, heuristic verifiers, and pipelines.
+
+**Run** (many sequential API calls; requires a valid `OPENAI_API_KEY`):
+
+```bash
+make structured-tutorial
+# or: pdm run structured-tutorial
+# or: pdm run python-framework structured-tutorial
+# one section only: pdm run python-framework structured-tutorial --only 3
+```
+
+Library code there is covered by tests with mocks; the **tutorial runner** is omitted from the coverage gate (interactive script). Run `make test` as usual.
+
 ## Configuration
 
 Copy env defaults (optional):
@@ -102,7 +117,7 @@ Global CLI flags:
 
 | Path | Purpose |
 | --- | --- |
-| `src/python_framework/` | Package: CLI, **Settings**, logging helpers, **`examples/`** (LLM demos). |
+| `src/python_framework/` | Package: CLI, **Settings**, logging helpers, **`examples/`** (LLM demos + **`structured_outputs_tutorial/`**). |
 | `tests/` | Pytest suite (`tests` is a package for mypy overrides). |
 | `Dockerfile` | Multi-stage image: **`pdm export`** → **`pip install`** into **`/usr/local`** (no in-container venv); runtime copies **`site-packages`** + **`python-framework`** entrypoint. |
 | `compose.yaml` | Compose service + **healthcheck** (`python-framework ping`). |
@@ -131,6 +146,7 @@ Global CLI flags:
 | `make test` | Pytest + coverage gate. |
 | `make run` | All registered LLM demos in order (requires `OPENAI_API_KEY`). |
 | `make prompt-example` | OpenAI contact extraction demo (requires `OPENAI_API_KEY`). |
+| `make structured-tutorial` | Full structured-outputs lesson path (many API calls). |
 | `make pre-commit-run` | Run every hook on all files. |
 | `make docker-build` / `make docker-run` | Single-arch image. |
 | `make docker-buildx-multi` | **linux/amd64** + **linux/arm64** → `./docker-multi/` (local OCI export). |

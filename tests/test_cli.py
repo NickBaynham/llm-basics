@@ -18,7 +18,14 @@ def test_build_parser_has_subcommands() -> None:
     subaction = actions["command"]
     choices = getattr(subaction, "choices", None)
     assert choices is not None
-    assert set(choices) >= {"hello", "ping", "config", "prompt-example", "run-examples"}
+    assert set(choices) >= {
+        "hello",
+        "ping",
+        "config",
+        "prompt-example",
+        "run-examples",
+        "structured-tutorial",
+    }
 
 
 def test_build_parser_has_logging_flags() -> None:
@@ -108,6 +115,15 @@ def test_run_examples_invokes_runner() -> None:
     with patch("python_framework.cli.run_all_examples_main", return_value=0) as runner:
         assert main(["run-examples"]) == 0
         runner.assert_called_once_with([])
+
+
+def test_structured_tutorial_invokes_run_tutorial() -> None:
+    with patch(
+        "python_framework.examples.structured_outputs_tutorial.tutorial.run_tutorial",
+        return_value=0,
+    ) as run:
+        assert main(["structured-tutorial"]) == 0
+        run.assert_called_once_with([])
 
 
 def test_prompt_example_missing_api_key_stderr(
