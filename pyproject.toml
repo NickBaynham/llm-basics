@@ -15,6 +15,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "python-dotenv>=1.0",
     "rich>=13.0",
+    "openai>=1.59",
 ]
 
 [project.scripts]
@@ -47,6 +48,7 @@ fallback_version = "0.1.0"
 # This script delegates to ``python -m python_framework`` instead.
 [tool.pdm.scripts]
 python-framework = { cmd = "python -m python_framework {args}" }
+prompt-example = { cmd = "python -m python_framework.examples.prompt_example {args}" }
 
 [tool.pdm.build]
 package-dir = "src"

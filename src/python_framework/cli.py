@@ -5,11 +5,14 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 from python_framework import __version__
 from python_framework.config import Settings
+from python_framework.examples.prompt_example import main as prompt_example_main
+from python_framework.examples.run_all import main as run_all_examples_main
 from python_framework.logging_config import configure_logging
 
 
@@ -52,6 +55,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Emit JSON instead of human-readable lines.",
     )
 
+    pex = sub.add_parser(
+        "prompt-example",
+        help="Extract contact fields from sample (or file) email via OpenAI; prints JSON.",
+    )
+    pex.add_argument(
+        "--email-file",
+        type=Path,
+        default=None,
+        help="Optional UTF-8 file with email body (default: built-in sample).",
+    )
+
+    sub.add_parser(
+        "run-examples",
+        help="Run all registered LLM / prompt demos in order (requires OPENAI_API_KEY).",
+    )
+
     return parser
 
 
@@ -82,5 +101,12 @@ def main(argv: list[str] | None = None) -> int:
             print(f"app_name={settings.app_name}")
             print(f"debug={settings.debug}")
         return 0
+    if args.command == "prompt-example":
+        pe_args: list[str] = []
+        if args.email_file is not None:
+            pe_args.extend(["--email-file", str(args.email_file)])
+        return prompt_example_main(pe_args)
+    if args.command == "run-examples":
+        return run_all_examples_main([])
 
     raise AssertionError(f"unhandled command: {args.command!r}")  # pragma: no cover

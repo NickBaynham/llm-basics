@@ -4,7 +4,7 @@ IMAGE ?= python-framework:local
 
 .PHONY: help setup configure lock install build lint format test run clean \
 	pre-commit-install pre-commit-run security sbom docker-build docker-run \
-	docker-buildx-multi compose-up compose-down
+	docker-buildx-multi compose-up compose-down prompt-example
 
 help:  ## Show available targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*?##' $(MAKEFILE_LIST) | sort | \
@@ -51,8 +51,11 @@ sbom:  ## Write CycloneDX JSON under dist/sbom-cyclonedx.json
 test:  ## Run unit tests with coverage gates
 	$(PDM) run pytest
 
-run:  ## Run the CLI locally via PDM
-	$(PDM) run python-framework hello
+prompt-example:  ## Run OpenAI contact extraction demo (needs OPENAI_API_KEY)
+	$(PDM) run python -m python_framework.examples.prompt_example
+
+run:  ## Run all registered LLM examples via PDM (needs OPENAI_API_KEY)
+	$(PDM) run python-framework run-examples
 
 run-ping:  ## Run the ping subcommand locally
 	$(PDM) run python-framework ping

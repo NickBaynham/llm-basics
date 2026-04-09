@@ -1,0 +1,305 @@
+Absolutely — here’s a **Cursor prompt** you can paste in to have it extend your existing Python framework repo cleanly.
+
+---
+
+## Cursor prompt
+
+````text
+You are working in an existing Python repository that already has:
+
+- PDM for dependency management
+- Makefile automation
+- Docker support
+- a sensible Python project structure
+
+Your task is to extend this project so it can run prompt-engineering examples from the terminal, using the OpenAI Python library and environment-based configuration.
+
+## Goal
+
+Add a small, production-style example module that:
+
+1. Loads secrets from a `.env` file
+2. Uses the OpenAI Python library
+3. Runs from the terminal
+4. Sends email text to an LLM
+5. Extracts the following fields from the email:
+   - name
+   - email
+   - phone
+   - company
+6. Returns the result as a properly typed Pydantic model
+7. Produces JSON output
+8. Includes automated tests that verify:
+   - each extracted value is correct
+   - the full JSON object is well-formed
+   - the JSON contains exactly the required keys
+
+Do not redesign the whole repo. Extend the existing structure cleanly and minimally.
+
+---
+
+## Requirements
+
+### Dependencies
+
+Add the required dependencies using PDM, including:
+
+- openai
+- pydantic
+- python-dotenv
+- pytest
+
+Use the current recommended OpenAI Python SDK style.
+
+---
+
+## Environment configuration
+
+Add support for a `.env` file.
+
+### Create:
+
+- `.env.example`
+
+Include at least:
+
+- `OPENAI_API_KEY=your_api_key_here`
+- optionally `OPENAI_MODEL=gpt-4.1-mini`
+
+Load environment variables in a clean reusable way.
+
+Do not commit secrets.
+
+Ensure `.env` is ignored by git if it is not already ignored.
+
+---
+
+## Feature implementation
+
+Create a small terminal-runnable example for structured extraction from email text.
+
+### Functional behavior
+
+Given an input email body like this:
+
+```text
+Hi there,
+
+My name is Sarah Chen and I work at BrightPath Analytics.
+You can reach me at sarah.chen@brightpath.io or call me at (415) 555-0198.
+
+Best,
+Sarah
+````
+
+The app should extract and return:
+
+```json
+{
+  "name": "Sarah Chen",
+  "email": "sarah.chen@brightpath.io",
+  "phone": "(415) 555-0198",
+  "company": "BrightPath Analytics"
+}
+```
+
+---
+
+## Pydantic model
+
+Use Pydantic to define a response model for the extracted contact information.
+
+Example fields:
+
+* `name: str`
+* `email: str`
+* `phone: str`
+* `company: str`
+
+The LLM result must be validated against this model before being returned.
+
+Prefer a strongly typed structured-output approach.
+
+---
+
+## OpenAI integration
+
+Implement the OpenAI call using the modern OpenAI Python SDK.
+
+Use a structured-output approach that maps the response into the Pydantic model.
+
+Encapsulate the OpenAI logic in a reusable service/module rather than placing everything in a script.
+
+Keep the implementation readable and well documented.
+
+Add sensible error handling for:
+
+* missing API key
+* malformed output
+* API failures
+
+---
+
+## CLI / terminal usage
+
+Add a terminal entry point so the example can be run easily.
+
+Support at least one of these approaches:
+
+* `python -m ...`
+* a small CLI module
+* a Make target
+
+Preferred developer experience:
+
+* `make prompt-example`
+
+This should run the extraction example and print formatted JSON to stdout.
+
+If your Makefile style supports it, also add a way to pass a text file or inline input later, but keep the default example working out of the box.
+
+---
+
+## Suggested project structure
+
+Adapt to the repo’s existing layout, but aim for something like:
+
+* `src/.../config.py`
+* `src/.../models/contact_info.py`
+* `src/.../services/contact_extractor.py`
+* `src/.../cli/prompt_example.py`
+* `tests/.../test_contact_extractor.py`
+
+Use the repository’s current naming conventions if they differ.
+
+---
+
+## Testing
+
+Add pytest-based tests.
+
+### Important:
+
+The tests must be reliable and should not require a live OpenAI API call.
+
+Mock the OpenAI client response so tests are deterministic.
+
+### Tests must assert:
+
+1. The returned object is a valid instance of the Pydantic model
+2. The extracted values match:
+
+   * `"Sarah Chen"`
+   * `"sarah.chen@brightpath.io"`
+   * `"(415) 555-0198"`
+   * `"BrightPath Analytics"`
+3. The JSON object contains exactly these keys:
+
+   * `name`
+   * `email`
+   * `phone`
+   * `company`
+4. The JSON object is serializable and structurally correct
+
+Use clear, maintainable tests.
+
+---
+
+## Makefile updates
+
+Add targets as needed, preferably:
+
+* `make install`
+* `make test`
+* `make prompt-example`
+
+Only add or update targets that are necessary for this feature.
+
+Do not break existing targets.
+
+---
+
+## Docker support
+
+If the current repo already supports Docker execution, ensure this feature works there too, or document clearly how to run it in Docker.
+
+Do not over-engineer container changes if they are unnecessary.
+
+---
+
+## README updates
+
+Update the README with a concise new section describing:
+
+1. What this prompt-engineering example does
+2. How to configure `.env`
+3. How to install dependencies with PDM
+4. How to run the example from terminal
+5. How to run tests
+
+Include example output.
+
+Keep documentation practical and developer-focused.
+
+---
+
+## Code quality expectations
+
+* Use clean Python
+* Add type hints
+* Keep functions small and readable
+* Add docstrings where useful
+* Reuse existing project patterns
+* Avoid unnecessary abstractions
+* Keep the feature minimal but solid
+
+---
+
+## Deliverables
+
+Implement all code changes directly in the repository, including:
+
+* dependency updates
+* `.env.example`
+* Pydantic model
+* OpenAI extraction service
+* terminal/CLI entry point
+* Make target
+* tests with mocking
+* README updates
+
+After making changes, provide a short summary of:
+
+1. files added/updated
+2. how to run the example
+3. how to run the tests
+
+````
+
+---
+
+## A slightly stronger version
+
+If you want Cursor to make the implementation a bit more robust, use this version of the **OpenAI behavior requirement** inside the prompt:
+
+```text
+Use the OpenAI Responses API or the current recommended SDK pattern for structured extraction. Prefer returning validated structured data directly into a Pydantic model rather than parsing loose text manually.
+````
+
+---
+
+## Nice extra touch to add
+
+You could also append this to the prompt so Cursor sets it up in a future-friendly way:
+
+```text
+Design the extraction service so that additional prompt-engineering examples can be added later without changing the overall structure. This repo should become a small playground for terminal-based LLM examples.
+```
+
+---
+
+## Suggested commit message
+
+```text
+add terminal prompt-engineering example with OpenAI structured extraction
+```

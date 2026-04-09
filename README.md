@@ -17,7 +17,63 @@ Runtime stack: **Pydantic Settings**, **python-dotenv**, and **Rich** logging (o
 make setup          # .env stub, pdm install -G dev, pre-commit install
 make lint           # ruff + mypy (src + tests) + bandit
 make test
-make run            # hello via PDM script
+make run            # all LLM examples (needs OPENAI_API_KEY)
+```
+
+## Prompt engineering example (OpenAI)
+
+This repo includes a small **structured extraction** demo: an email-style body is sent to OpenAI using **`chat.completions.parse`** with a **Pydantic** schema, and validated **`ContactInfo`** (`name`, `email`, `phone`, `company`) is printed as JSON.
+
+**Configure** (copy [.env.example](./.env.example) → `.env` or export in your shell):
+
+| Variable | Required | Meaning |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | Yes | API key for OpenAI. |
+| `OPENAI_MODEL` | No | Model id (default `gpt-4.1-mini`). |
+
+**Install** dependencies (already includes `openai`, `pydantic`, `python-dotenv`; tests use **pytest** from the dev group):
+
+```bash
+make install    # or: pdm install -G dev
+```
+
+**Run all demos** (each example runs in order; same requirements as below):
+
+```bash
+make run
+# or: pdm run python-framework run-examples
+```
+
+**Run** a single demo — contact extraction uses a built-in sample email unless you pass `--email-file`:
+
+```bash
+make prompt-example
+# same: pdm run prompt-example
+# or:   pdm run python-framework prompt-example
+# or:   pdm run python -m python_framework.examples.prompt_example --email-file ./my-email.txt
+```
+
+**Example output** (values match the built-in Sarah Chen sample):
+
+```json
+{
+  "company": "BrightPath Analytics",
+  "email": "sarah.chen@brightpath.io",
+  "name": "Sarah Chen",
+  "phone": "(415) 555-0198"
+}
+```
+
+**Tests** mock the OpenAI client (no live API calls):
+
+```bash
+make test
+```
+
+**Docker:** the image installs production dependencies (including `openai`). Run the example by passing your key (prefer Compose `env_file: .env` or `-e`), for example:
+
+```bash
+docker run --rm -e OPENAI_API_KEY="$OPENAI_API_KEY" python-framework:local prompt-example
 ```
 
 ## Configuration
@@ -46,7 +102,7 @@ Global CLI flags:
 
 | Path | Purpose |
 | --- | --- |
-| `src/python_framework/` | Package: CLI, **Settings**, logging helpers. |
+| `src/python_framework/` | Package: CLI, **Settings**, logging helpers, **`examples/`** (LLM demos). |
 | `tests/` | Pytest suite (`tests` is a package for mypy overrides). |
 | `Dockerfile` | Multi-stage image: **`pdm export`** → **`pip install`** into **`/usr/local`** (no in-container venv); runtime copies **`site-packages`** + **`python-framework`** entrypoint. |
 | `compose.yaml` | Compose service + **healthcheck** (`python-framework ping`). |
@@ -73,6 +129,8 @@ Global CLI flags:
 | `make security` | Export requirements and run **pip-audit**. |
 | `make sbom` | **CycloneDX** JSON → `dist/sbom-cyclonedx.json`. |
 | `make test` | Pytest + coverage gate. |
+| `make run` | All registered LLM demos in order (requires `OPENAI_API_KEY`). |
+| `make prompt-example` | OpenAI contact extraction demo (requires `OPENAI_API_KEY`). |
 | `make pre-commit-run` | Run every hook on all files. |
 | `make docker-build` / `make docker-run` | Single-arch image. |
 | `make docker-buildx-multi` | **linux/amd64** + **linux/arm64** → `./docker-multi/` (local OCI export). |
