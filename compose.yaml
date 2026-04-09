@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: python-framework:local
+    # Image CMD is "hello" (prints once and exits). For Compose + healthcheck the process
+    # must stay up; use a hold-open command and probe with ping separately.
+    command: ["sleep", "infinity"]
+    env_file:
+      - .env.example
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHON_FRAMEWORK_PLAIN_LOG: "1"
+    healthcheck:
+      test: ["CMD", "python-framework", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -1,0 +1,21 @@
+{
+  "name": "python-framework",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bookworm",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "ms-python.python",
+        "ms-python.mypy-type-checker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+        "ruff.importStrategy": "fromEnvironment"
+      }
+    }
+  },
+  "postCreateCommand": "pipx install pdm && pdm install -G dev",
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} || true",
+  "forwardPorts": []
+}

@@ -1,25 +1,29 @@
-"""Runtime configuration sourced from environment variables."""
+"""Runtime configuration from environment variables (Pydantic Settings)."""
 
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-@dataclass(frozen=True)
-class Settings:
-    """Framework settings with explicit, minimal surface area."""
+class Settings(BaseSettings):
+    """App settings from ``PYTHON_FRAMEWORK_*`` env vars (call ``load_dotenv()`` for ``.env``)."""
 
-    app_name: str
-    debug: bool
+    model_config = SettingsConfigDict(
+        env_prefix="PYTHON_FRAMEWORK_",
+        extra="ignore",
+        str_strip_whitespace=True,
+    )
 
+    app_name: str = "python-framework"
+    debug: bool = False
+
+    @field_validator("debug", mode="before")
     @classmethod
-    def from_environ(cls, environ: dict[str, str] | None = None) -> Settings:
-        """Build settings from a mapping (defaults to ``os.environ``)."""
-        env = os.environ if environ is None else environ
-        raw_debug = env.get("PYTHON_FRAMEWORK_DEBUG", "").lower()
-        debug = raw_debug in {"1", "true", "yes", "on"}
-        return cls(
-            app_name=env.get("PYTHON_FRAMEWORK_APP_NAME", "python-framework"),
-            debug=debug,
-        )
+    def parse_debug(cls, v: object) -> bool:
+        if isinstance(v, bool):
+            return v
+        if v is None or v == "":
+            return False
+        s = str(v).strip().lower()
+        return s in {"1", "true", "yes", "on"}

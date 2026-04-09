@@ -9,15 +9,24 @@ from python_framework.cli import build_parser, main
 
 def test_build_parser_has_subcommands() -> None:
     parser = build_parser()
-    subs = {action.dest: action for action in parser._actions if hasattr(action, "choices")}
-    assert "command" in subs
-    choices = subs["command"].choices
+    # argparse stores the subparsers action on the _subparsers pseudo-action
+    actions = {getattr(a, "dest", None): a for a in parser._actions}
+    assert "command" in actions
+    subaction = actions["command"]
+    choices = getattr(subaction, "choices", None)
     assert choices is not None
     assert set(choices) >= {"hello", "ping", "config"}
 
 
+def test_build_parser_has_logging_flags() -> None:
+    parser = build_parser()
+    flags = {a.dest for a in parser._actions if hasattr(a, "dest")}
+    assert "log_level" in flags
+    assert "log_json" in flags
+
+
 def test_hello_default(capsys: pytest.CaptureFixture[str]) -> None:
-    code = main(["hello"])
+    code = main(["--log-level", "CRITICAL", "hello"])
     assert code == 0
     assert "Hello, world!" in capsys.readouterr().out
 
@@ -57,3 +66,11 @@ def test_version_exits_zero() -> None:
     with pytest.raises(SystemExit) as exc:
         main(["--version"])
     assert exc.value.code == 0
+
+
+def test_main_log_json_writes_structured_log(capsys: pytest.CaptureFixture[str]) -> None:
+    code = main(["--log-level", "INFO", "--log-json", "ping"])
+    assert code == 0
+    out = capsys.readouterr().out
+    lines = [ln for ln in out.splitlines() if ln.strip()]
+    assert any('"level": "INFO"' in ln and "ping" in ln for ln in lines)
